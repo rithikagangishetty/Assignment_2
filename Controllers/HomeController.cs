@@ -20,11 +20,11 @@ namespace Assignment_1.Controllers
     
         public IActionResult Index()
         {
-            string Date = Set_Date();
-            string Ip_address = Set_Ip_Address();
+            string Date = SetDate();
+            string Ip_address = SetIpAddress();
             Console.WriteLine("NO:", Ip_address);
-            string Time = Set_Time();
-            ViewData["string"] = Add_Date_Time_Ip( Date, Time,  Ip_address);
+            string Time = SetTime();
+            ViewData["string"] = AddDateTimeIp( Date, Time,  Ip_address);
             return View();
         }
 
@@ -41,10 +41,10 @@ namespace Assignment_1.Controllers
         [HttpPost]
         public IActionResult CreateForm(FormDetails product)
         {
-            MongoClient client_db = new MongoClient("mongodb://localhost:27017");
+            MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
 
-            var user_db = client_db.GetDatabase("UserFormData");
-            var collection = user_db.GetCollection<BsonDocument>("data");
+            var dbUser = dbClient.GetDatabase("UserFormData");
+            var collection = dbUser.GetCollection<BsonDocument>("data");
             var document = new BsonDocument { { "Name", product.Name }, { "Country", product.Country } };
             collection.InsertOne(document);
 
@@ -55,9 +55,9 @@ namespace Assignment_1.Controllers
             MongoClient Client = new MongoClient("mongodb://localhost:27017");
             var db = Client.GetDatabase("UserFormData");
             var collection = db.GetCollection<BsonDocument>("data");
-            var list_db = collection.Find(new BsonDocument()).ToList();
+            var dbList = collection.Find(new BsonDocument()).ToList();
             BsonDocument document2 = new BsonDocument();
-            foreach (var item in list_db)
+            foreach (var item in dbList)
             {
                 document2 = item;
             }
@@ -72,42 +72,42 @@ namespace Assignment_1.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        public string Set_Date()
+        public string SetDate()
         {
             string Date = DateTime.Now.ToString("dd-MM-yyyy");
             return Date;
         }
-        public string Set_Time()
+        public string SetTime()
           {
             string Time = DateTime.Now.ToString("HH:mm:ss");
             return Time;
         }
-    public string Set_Ip_Address()
+    public string SetIpAddress()
         {
-            string Ip_Address = Response.HttpContext.Connection.RemoteIpAddress.ToString();
-            return Ip_Address;
+            string IpAddress = Response.HttpContext.Connection.RemoteIpAddress.ToString();
+            return IpAddress;
 
         }
-        public string Add_Date_Time_Ip(string Date,  string Time, string Ip_Address)
+        public string AddDateTimeIp(string Date,  string Time, string IpAddress)
         {
-            MongoClient client_db = new MongoClient("mongodb://localhost:27017");
+            MongoClient clientDb = new MongoClient("mongodb://localhost:27017");
 
-            var user_db = client_db.GetDatabase("UserDataCollection");
-            var collection = user_db.GetCollection<BsonDocument>("Info");
-            var document = new BsonDocument { { "Date", Date }, { "Time",Time},{ "IP", Ip_Address } };
+            var userDb = clientDb.GetDatabase("UserDataCollection");
+            var collection = userDb.GetCollection<BsonDocument>("Info");
+            var document = new BsonDocument { { "Date", Date }, { "Time",Time},{ "IP", IpAddress } };
             collection.InsertOne(document);
             return "string";
         }
         public string GetUserData()
         {
-            MongoClient client_db = new MongoClient("mongodb://localhost:27017");
+            MongoClient clientDb = new MongoClient("mongodb://localhost:27017");
 
-            var db_user = client_db.GetDatabase("UserDataCollection");
-            var collect = db_user.GetCollection<BsonDocument>("Info");
+            var user = clientDb.GetDatabase("UserDataCollection");
+            var collect = user.GetCollection<BsonDocument>("Info");
 
-            var list_db = collect.Find(new BsonDocument()).ToList();
+            var listDb = collect.Find(new BsonDocument()).ToList();
             BsonDocument document2 = new BsonDocument();
-            foreach (var item in list_db)
+            foreach (var item in listDb)
             {
                 document2 = item;
             }

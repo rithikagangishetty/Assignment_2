@@ -11,12 +11,14 @@
 {
       <div>
         @Html.LabelFor(m=>m.Name)<br/>
-        @Html.TextBoxFor(m=>m.Name,"",htmlAttributes:new {@class="required"})
+        @Html.TextBoxFor(m=>m.Name)
+        @Html.ValidationMessageFor(m=>m.Name,"",new{@class = "error"})
       </div>
       <br/>
     <div>
         @Html.LabelFor(m=>m.Country)<br />
         @Html.TextBoxFor(m=>m.Country,"",htmlAttributes:new {@class="required"})
+        @Html.ValidationMessageFor(m=>m.Country,"",new{@class = "error"})
     </div>
     <br />
     
