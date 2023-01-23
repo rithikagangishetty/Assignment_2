@@ -52,25 +52,31 @@ namespace Assignment_1.Controllers
         }
         [HttpGet]
         public IActionResult ViewImage()
-        {
-         
-           
-
+        { 
             return View();
         }
         [HttpPost]
         public IActionResult ViewImage(CreateImage item)
         {
             MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
-            var dbUser = dbClient.GetDatabase("Images");
-            GridFSBucket grid = new GridFSBucket(dbUser);
-            var document = new CreateImage();
-            document.Title = item.Title;
-            document.Description = item.Description;
-            document.Image= item.Image;
-            document.ID = item.ID;
-            grid.InsertOne(document);
-            return Redirect("/");
+            var database = dbClient.GetDatabase("Images");
+
+
+
+            var bucket = new GridFSBucket(database, new GridFSBucketOptions
+            {
+                BucketName = "Image",
+                ChunkSizeBytes = 258048, //255KB
+                WriteConcern = WriteConcern.WMajority,
+                ReadPreference = ReadPreference.Secondary
+
+            });
+
+            ObjectId id = bucket.UploadFromBytes(item.filename, item.Image );
+
+            RedirectResult redirectResult = Redirect("https://localhost:7043/Home");
+
+            return redirectResult;
         }
 
         public ActionResult ViewInfo()
