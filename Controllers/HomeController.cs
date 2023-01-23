@@ -7,6 +7,8 @@ using System.Net;
 using MongoDB.Driver.GridFS;
 using System.Text;
 using System.Reflection.Metadata;
+using Microsoft.Identity.Client;
+using System.IO;
 
 namespace Assignment_1.Controllers
 {
@@ -60,20 +62,28 @@ namespace Assignment_1.Controllers
         {
             MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
             var database = dbClient.GetDatabase("Images");
+            var db = new CreateImage();
+            db.Title = item.Title;
+            db.Image= item.Image;
+            db.ID = item.ID;
 
-
-
-            var bucket = new GridFSBucket(database, new GridFSBucketOptions
+            var options = new GridFSUploadOptions
             {
-                BucketName = "Image",
-                ChunkSizeBytes = 258048, //255KB
-                WriteConcern = WriteConcern.WMajority,
-                ReadPreference = ReadPreference.Secondary
+                ChunkSizeBytes = 64512, // 63KB
+                Metadata = new BsonDocument
+    {
+        { "resolution", "1080P" },
+        { "copyrighted", true }
+    }
+            };
+            IGridFSBucket bucket = new GridFSBucket(database);
 
-            });
-
-            ObjectId id = bucket.UploadFromBytes(item.filename, item.Image );
-
+            using (var stream = bucket.OpenUploadStream("db", options))
+            {
+                var id = stream.Id;
+                stream.Close();
+            }
+           
             RedirectResult redirectResult = Redirect("https://localhost:7043/Home");
 
             return redirectResult;

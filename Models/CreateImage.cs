@@ -13,7 +13,8 @@ namespace Assignment_1.Models
             public int ID { get; set; }
           
             public byte[]?  Image { get; set; }
-            public string? filename { get; set; }
+            
+        public string? Title { get; set; }
         
     }
     
