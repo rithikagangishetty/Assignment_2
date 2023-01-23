@@ -4,6 +4,7 @@ using System.Diagnostics;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Net;
+using MongoDB.Driver.GridFS;
 using System.Text;
 using System.Reflection.Metadata;
 
@@ -42,7 +43,6 @@ namespace Assignment_1.Controllers
         public IActionResult CreateForm(FormDetails product)
         {
             MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
-
             var dbUser = dbClient.GetDatabase("UserFormData");
             var collection = dbUser.GetCollection<BsonDocument>("data");
             var document = new BsonDocument { { "Name", product.Name }, { "Country", product.Country } };
@@ -50,6 +50,29 @@ namespace Assignment_1.Controllers
 
             return Redirect("/");
         }
+        [HttpGet]
+        public IActionResult ViewImage()
+        {
+         
+           
+
+            return View();
+        }
+        [HttpPost]
+        public IActionResult ViewImage(CreateImage item)
+        {
+            MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
+            var dbUser = dbClient.GetDatabase("Images");
+            GridFSBucket grid = new GridFSBucket(dbUser);
+            var document = new CreateImage();
+            document.Title = item.Title;
+            document.Description = item.Description;
+            document.Image= item.Image;
+            document.ID = item.ID;
+            grid.InsertOne(document);
+            return Redirect("/");
+        }
+
         public ActionResult ViewInfo()
         {
             MongoClient Client = new MongoClient("mongodb://localhost:27017");
