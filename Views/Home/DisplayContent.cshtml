@@ -1,0 +1,10 @@
+﻿@model Assignment_1.Models.CreateImage
+@{
+    ViewBag.Title = "User Details";
+}
+
+
+@using (Html.BeginForm(new { controller = "Home", action = "DisplayDescription", Country = @Model.Description }))
+{
+    <input type="submit" value=@Html.DisplayFor(modelItem=>@Model.Title)>
+}

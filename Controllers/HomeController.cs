@@ -12,6 +12,8 @@ using System.IO;
 using System;
 using System.Net.Sockets;
 using System.Drawing;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.Extensions.Options;
 
 namespace Assignment_1.Controllers
 {
@@ -39,79 +41,6 @@ namespace Assignment_1.Controllers
             ViewData["string"]=GetUserData();
             return View();
         }
-        [HttpGet]
-        public IActionResult CreateForm()
-        {
-            return View();
-        }
-        [HttpPost]
-        public IActionResult CreateForm(FormDetails product)
-        {
-            MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
-            var dbUser = dbClient.GetDatabase("UserFormData");
-            var collection = dbUser.GetCollection<BsonDocument>("data");
-            var document = new BsonDocument { { "Name", product.Name }, { "Country", product.Country } };
-            collection.InsertOne(document);
-
-            return Redirect("/");
-        }
-     
-        public IActionResult ViewImage()
-        { 
-            return View();
-        }
-        [HttpPost]
-        public async Task<IActionResult> ViewImage(CreateImage item)
-        {
-            MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
-            var database = dbClient.GetDatabase("Images");
-            IGridFSBucket bucket = new GridFSBucket(database);
-            var ImageData = new CreateImage();
-            ImageData.Image = item.Image;
-            ImageData.Title = item.Title;
-            ImageData.Description = item.Description;
-            ImageData.Id = item.Id;
-           var options = new GridFSUploadOptions
-         
-            {
-                ChunkSizeBytes = 64512, // 63KB
-                Metadata = new BsonDocument
-    {
-        { "resolution", "1080P" },
-                    { "copyrighted", true }
-    }
-            };
-
-
-
-            using var stream = await bucket.OpenUploadStreamAsync(item.Title, options);
-            var id = stream.Id;
-            ImageData.Image.CopyTo(stream);
-            await  stream.CloseAsync();
-            
-           
-            //RedirectResult redirectResult = Redirect("https://localhost:7043/Home");
-
-            return View("Index");
-        }
-
-        public ActionResult ViewInfo()
-        {
-            MongoClient Client = new MongoClient("mongodb://localhost:27017");
-            var db = Client.GetDatabase("UserFormData");
-            var collection = db.GetCollection<BsonDocument>("data");
-            var dbList = collection.Find(new BsonDocument()).ToList();
-            BsonDocument document2 = new BsonDocument();
-            foreach (var item in dbList)
-            {
-                document2 = item;
-            }
-            FormDetails form = new FormDetails();
-            form.Name = document2["Name"].ToString();
-            form.Country = document2["Country"].ToString();
-            return View(form);
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -123,23 +52,23 @@ namespace Assignment_1.Controllers
             return Date;
         }
         public string SetTime()
-          {
+        {
             string Time = DateTime.Now.ToString("HH:mm:ss");
             return Time;
         }
-    public string SetIpAddress()
+        public string SetIpAddress()
         {
             string IpAddress = Response.HttpContext.Connection.RemoteIpAddress.ToString();
             return IpAddress;
 
         }
-        public string AddDateTimeIp(string Date,  string Time, string IpAddress)
+        public string AddDateTimeIp(string Date, string Time, string IpAddress)
         {
             MongoClient clientDb = new MongoClient("mongodb://localhost:27017");
 
             var userDb = clientDb.GetDatabase("UserDataCollection");
             var collection = userDb.GetCollection<BsonDocument>("Info");
-            var document = new BsonDocument { { "Date", Date }, { "Time",Time},{ "IP", IpAddress } };
+            var document = new BsonDocument { { "Date", Date }, { "Time", Time }, { "IP", IpAddress } };
             collection.InsertOne(document);
             return "string";
         }
@@ -158,10 +87,113 @@ namespace Assignment_1.Controllers
             }
             return $"Date :{document2["Date"].ToString()}, Time : {document2["Time"].ToString()},Ip Address :{document2["IP"].ToString()}";
         }
-   
+
+        [HttpGet]
+        public IActionResult CreateForm()
+        {
+            return View();
+        }
+        [HttpPost]
+        public IActionResult CreateForm(FormDetails product)
+        {
+            MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
+            var dbUser = dbClient.GetDatabase("UserFormData");
+            var collection = dbUser.GetCollection<BsonDocument>("data");
+            var document = new BsonDocument { { "Name", product.Name }, { "Country", product.Country } };
+            collection.InsertOne(document);
+
+            return Redirect("/");
+        }
+        public ActionResult ViewInfo()
+        {
+            MongoClient Client = new MongoClient("mongodb://localhost:27017");
+            var db = Client.GetDatabase("UserFormData");
+            var collection = db.GetCollection<BsonDocument>("data");
+            var dbList = collection.Find(new BsonDocument()).ToList();
+            BsonDocument document2 = new BsonDocument();
+            foreach (var item in dbList)
+            {
+                document2 = item;
+            }
+            FormDetails form = new FormDetails();
+            form.Name = document2["Name"].ToString();
+            form.Country = document2["Country"].ToString();
+            return View(form);
+        }
+
         public string DisplayCountry(string country)
         {
             return country;
+        }
+        [HttpGet]
+        public IActionResult ViewImage()
+        { 
+            return View();
+        }
+        [HttpPost]
+        public IActionResult ViewImage(CreateImage item)
+        {
+            MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
+            var database = dbClient.GetDatabase("Images");
+            GridFSBucket bucket = new GridFSBucket(database);
+            CreateImage ImageData = new CreateImage()
+            {
+                Image = item.Image,
+                Title = item.Title,
+                Description = item.Description,
+                Id = item.Id
+            };
+           var options = new GridFSUploadOptions
+         
+            {
+                ChunkSizeBytes = 516096, // 504KB
+                Metadata = new BsonDocument
+    {
+        { "resolution", "1080P" },
+                    { "copyrighted", true }
+    }
+            };
+
+
+
+            using var stream =  bucket.OpenUploadStream(item.Title, options);
+           var id = stream.Id;
+            ImageData.Image.CopyTo(stream);
+            stream.Close();
+            return Redirect("/");
+        }
+
+        public ActionResult DisplayContent()
+        {
+            MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
+            var database = dbClient.GetDatabase("Images");
+            GridFSBucket bucket = new GridFSBucket(database);
+            var collection = database.GetCollection<BsonDocument>("fs.files");
+            var dbList = collection.Find(new BsonDocument()).ToList();
+            BsonDocument document2 = new BsonDocument();
+            CreateImage ImageData = new CreateImage();
+            foreach (var item in dbList)
+            {
+                document2 = item;
+            }
+            var Id = document2["_id"];
+            var bytes = bucket.DownloadAsBytes(Id);
+            using (var stream = bucket.OpenDownloadStream(Id))
+            {
+
+                ImageData.Image.CopyTo(stream);
+                stream.Close();
+            }
+
+            return View(ImageData);
+
+            
+        }
+
+
+        public string DisplayDescription(string description)
+        {
+            return description;
         }
 
 
