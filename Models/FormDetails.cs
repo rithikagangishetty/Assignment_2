@@ -13,6 +13,8 @@ namespace Assignment_1.Models
         public string ?Name { get; set; }
         [Required(ErrorMessage = "Country is required")]
         public string ?Country { get; set; }
-       
+
+     
+
     }
 }

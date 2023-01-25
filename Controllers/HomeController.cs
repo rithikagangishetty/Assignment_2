@@ -14,6 +14,8 @@ using System.Net.Sockets;
 using System.Drawing;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
+using System.Collections;
 
 namespace Assignment_1.Controllers
 {
@@ -135,14 +137,10 @@ namespace Assignment_1.Controllers
         {
             MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
             var database = dbClient.GetDatabase("Images");
+            var collection = database.GetCollection<BsonDocument>("data");
+            
+
             GridFSBucket bucket = new GridFSBucket(database);
-            CreateImage ImageData = new CreateImage()
-            {
-                Image = item.Image,
-                Title = item.Title,
-                Description = item.Description,
-                Id = item.Id
-            };
            var options = new GridFSUploadOptions
          
             {
@@ -154,12 +152,13 @@ namespace Assignment_1.Controllers
     }
             };
 
-
-
             using var stream =  bucket.OpenUploadStream(item.Title, options);
            var id = stream.Id;
-            ImageData.Image.CopyTo(stream);
+          
+            item.Image.CopyTo(stream);
             stream.Close();
+            var document = new BsonDocument { { "Title", item.Title }, { "Description", item.Description }, { "Id", id } };
+            collection.InsertOne(document);
             return Redirect("/");
         }
 
@@ -168,7 +167,7 @@ namespace Assignment_1.Controllers
             MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
             var database = dbClient.GetDatabase("Images");
             GridFSBucket bucket = new GridFSBucket(database);
-            var collection = database.GetCollection<BsonDocument>("fs.files");
+            var collection = database.GetCollection<BsonDocument>("data");
             var dbList = collection.Find(new BsonDocument()).ToList();
             BsonDocument document2 = new BsonDocument();
             CreateImage ImageData = new CreateImage();
@@ -176,15 +175,14 @@ namespace Assignment_1.Controllers
             {
                 document2 = item;
             }
-            var Id = document2["_id"];
-            var bytes = bucket.DownloadAsBytes(Id);
-            using (var stream = bucket.OpenDownloadStream(Id))
-            {
-
-                ImageData.Image.CopyTo(stream);
-                stream.Close();
-            }
-
+            var Id = document2["Id"];
+            ImageData.Title = document2["Title"].ToString();
+            ImageData.Description = document2["Description"].ToString();
+            var byteArray=bucket.DownloadAsBytes(Id);
+            var stream = new MemoryStream(byteArray);
+            IFormFile file = new FormFile(stream, 0, byteArray.Length, "name", "fileName");
+            ImageData.Image = file;
+          
             return View(ImageData);
 
             
