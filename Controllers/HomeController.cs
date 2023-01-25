@@ -9,6 +9,9 @@ using System.Text;
 using System.Reflection.Metadata;
 using Microsoft.Identity.Client;
 using System.IO;
+using System;
+using System.Net.Sockets;
+using System.Drawing;
 
 namespace Assignment_1.Controllers
 {
@@ -52,41 +55,44 @@ namespace Assignment_1.Controllers
 
             return Redirect("/");
         }
-        [HttpGet]
+     
         public IActionResult ViewImage()
         { 
             return View();
         }
         [HttpPost]
-        public IActionResult ViewImage(CreateImage item)
+        public async Task<IActionResult> ViewImage(CreateImage item)
         {
             MongoClient dbClient = new MongoClient("mongodb://localhost:27017");
             var database = dbClient.GetDatabase("Images");
-            var db = new CreateImage();
-            db.Title = item.Title;
-            db.Image= item.Image;
-            db.ID = item.ID;
-
-            var options = new GridFSUploadOptions
+            IGridFSBucket bucket = new GridFSBucket(database);
+            var ImageData = new CreateImage();
+            ImageData.Image = item.Image;
+            ImageData.Title = item.Title;
+            ImageData.Description = item.Description;
+            ImageData.Id = item.Id;
+           var options = new GridFSUploadOptions
+         
             {
                 ChunkSizeBytes = 64512, // 63KB
                 Metadata = new BsonDocument
     {
         { "resolution", "1080P" },
-        { "copyrighted", true }
+                    { "copyrighted", true }
     }
             };
-            IGridFSBucket bucket = new GridFSBucket(database);
 
-            using (var stream = bucket.OpenUploadStream("db", options))
-            {
-                var id = stream.Id;
-                stream.Close();
-            }
+
+
+            using var stream = await bucket.OpenUploadStreamAsync(item.Title, options);
+            var id = stream.Id;
+            ImageData.Image.CopyTo(stream);
+            await  stream.CloseAsync();
+            
            
-            RedirectResult redirectResult = Redirect("https://localhost:7043/Home");
+            //RedirectResult redirectResult = Redirect("https://localhost:7043/Home");
 
-            return redirectResult;
+            return View("Index");
         }
 
         public ActionResult ViewInfo()

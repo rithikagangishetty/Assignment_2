@@ -19,7 +19,7 @@
     }
 </script>
 
-@using (Html.BeginForm( FormMethod.Post))
+@using (Html.BeginForm("ViewImage", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
 
@@ -36,22 +36,22 @@
             </div>
         </div>
 
+     
         <div class="form-group">
-            @Html.LabelFor(model => model.Image, new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                <input type="file" name="ImageData" id="ImageData"/>
-                @Html.ValidationMessageFor(model => model.Image)
-            </div>
-        </div>
-       
-
-       @* <div class="form-group">
             @Html.LabelFor(model => model.Description, new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.TextAreaFor(model => model.Description, new { @class = "form-control", placeholder = "Content Description" })
                 @Html.ValidationMessageFor(model => model.Description)
             </div>
-        </div>*@
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Image, new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="file" name="ImageData" id="ImageData" />
+                @Html.ValidationMessageFor(model => model.Image)
+            </div>
+        </div>
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
