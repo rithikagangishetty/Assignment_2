@@ -1,5 +1,5 @@
 ﻿
-@model IEnumerable<Assignment_1.Models.CreateImage>
+@*@model IEnumerable<Assignment_1.Models.CreateImage>
 @{
     ViewBag.Title = "Image Details";
 }
@@ -17,6 +17,35 @@
             document.getElementById("img").style.display = "block";
         }
     </script>
-   
+  
 
+
+}*@
+
+@*
+        @using (Html.BeginForm(new { controller = "Home", action = "DisplayCountry", Country = @Model.Country }))
+        {
+                <img src=@Model.Name width = "300" height = "300" >
+                    <input type="submit">
+        }
+  *@
+
+
+
+
+@model Assignment_1.Models.FormDetails
+@{
+    ViewBag.Title = "User Details";
 }
+<p class="inner" id ="img">
+     Description of the image : @Model.Country
+    </p>
+<p onclick = "fun()" id = "btn">
+        <img src="@Model.Name" width="300" height="300">
+</p>
+    <script>
+        function function() {
+            document.getElementById("img").style.display = "block";
+        }
+    </script>
+

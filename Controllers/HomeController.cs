@@ -171,20 +171,28 @@ namespace Assignment_1.Controllers
             var collection = database.GetCollection<BsonDocument>("data");
             var dbList = collection.Find(new BsonDocument()).ToList();
             BsonDocument document2 = new BsonDocument();
-            List<CreateImage> ImageData = new List<CreateImage>();
+          //  List<CreateImage> ImageData = new List<CreateImage>();
             foreach (var item in dbList)
             {
                 document2 = item;
-                var Id = document2["Id"];
-                var byteArray = bucket.DownloadAsBytes(Id);
-                string Image = Convert.ToBase64String(byteArray);
-                string Url = string.Format("data:image/png;base64,{0}", Image);
-                ImageData.Add(new CreateImage() { Url = Url, Description = document2["Description"].ToString() });
+                //var Id = document2["Id"];
+                //var byteArray = bucket.DownloadAsBytes(Id);
+                //string Image = Convert.ToBase64String(byteArray);
+                //string Url = string.Format("data:image/png;base64,{0}", Image);
+               // ImageData.Add(new CreateImage() { Url = Url, Description = document2["Description"].ToString() });
 
             }
+            var Id = document2["Id"];
+            var byteArray = bucket.DownloadAsBytes(Id);
+            string Image = Convert.ToBase64String(byteArray);
+            string Url = string.Format("data:image/png;base64,{0}", Image);
+            FormDetails form = new FormDetails();
+            form.Name = Url;
+            form.Country = document2["Description"].ToString();
+            return View(form);
 
 
-            return View(ImageData);
+           // return View(ImageData);
 
             
         }
