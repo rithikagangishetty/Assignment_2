@@ -190,10 +190,7 @@ namespace Assignment_1.Controllers
         }
 
 
-        public string DisplayDescription(string description)
-        {
-            return description;
-        }
+     
 
 
     }
