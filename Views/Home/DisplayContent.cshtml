@@ -1,10 +1,22 @@
-﻿@model Assignment_1.Models.CreateImage
+﻿
+@model IEnumerable<Assignment_1.Models.CreateImage>
 @{
-    ViewBag.Title = "User Details";
+    ViewBag.Title = "Image Details";
 }
 
-
-@using (Html.BeginForm(new { controller = "Home", action = "DisplayDescription", Country = @Model.Description }))
+@foreach (var item in Model)
 {
-    <input type="submit" value=@Html.DisplayFor(modelItem=>@Model.Title)>
+    <p class="inner" id ="img">
+     Description of the image : @item.Description
+    </p>
+<p onclick = "fun()" id = "btn">
+        <img src="@item.Url" width="300" height="300">
+</p>
+    <script>
+        function function() {
+            document.getElementById("img").style.display = "block";
+        }
+    </script>
+   
+
 }

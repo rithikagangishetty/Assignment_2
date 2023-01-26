@@ -16,6 +16,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Assignment_1.Controllers
 {
@@ -120,7 +121,7 @@ namespace Assignment_1.Controllers
             FormDetails form = new FormDetails();
             form.Name = document2["Name"].ToString();
             form.Country = document2["Country"].ToString();
-            return View(form);
+            return View("ViewInfo",form);
         }
 
         public string DisplayCountry(string country)
@@ -170,19 +171,19 @@ namespace Assignment_1.Controllers
             var collection = database.GetCollection<BsonDocument>("data");
             var dbList = collection.Find(new BsonDocument()).ToList();
             BsonDocument document2 = new BsonDocument();
-            CreateImage ImageData = new CreateImage();
+            List<CreateImage> ImageData = new List<CreateImage>();
             foreach (var item in dbList)
             {
                 document2 = item;
+                var Id = document2["Id"];
+                var byteArray = bucket.DownloadAsBytes(Id);
+                string Image = Convert.ToBase64String(byteArray);
+                string Url = string.Format("data:image/png;base64,{0}", Image);
+                ImageData.Add(new CreateImage() { Url = Url, Description = document2["Description"].ToString() });
+
             }
-            var Id = document2["Id"];
-            ImageData.Title = document2["Title"].ToString();
-            ImageData.Description = document2["Description"].ToString();
-            var byteArray=bucket.DownloadAsBytes(Id);
-            var stream = new MemoryStream(byteArray);
-            IFormFile file = new FormFile(stream, 0, byteArray.Length, "name", "fileName");
-            ImageData.Image = file;
-          
+
+
             return View(ImageData);
 
             
